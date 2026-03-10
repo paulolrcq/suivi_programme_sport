@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programme Muscu — Demi de Mêlée</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111318;
+    --card: #16191f;
+    --card2: #1c2028;
+    --border: #2a2f3a;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --red: #e8413a;
+    --blue: #3a7ee8;
+    --orange: #e87c3a;
+    --green: #3ae87a;
+    --yellow: #e8c83a;
+    --purple: #9b3ae8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--black); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.5; }
+
+  .header { position:relative; padding:60px 40px 40px; border-bottom:1px solid var(--border); overflow:hidden; }
+  .header::before { content:''; position:absolute; top:-80px; right:-100px; width:400px; height:400px; background:radial-gradient(circle, rgba(232,65,58,0.12) 0%, transparent 70%); pointer-events:none; }
+  .header-tag { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--red); text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .header-tag::before { content:''; display:inline-block; width:20px; height:1px; background:var(--red); }
+  .header h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(48px,8vw,96px); line-height:0.9; letter-spacing:2px; }
+  .header h1 span { color:var(--red); }
+  .header-sub { margin-top:16px; font-size:15px; color:var(--muted); max-width:560px; line-height:1.6; }
+  .profile-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; }
+  .chip { padding:6px 14px; border-radius:100px; font-size:12px; font-weight:500; letter-spacing:0.5px; }
+  .chip-red { background:rgba(232,65,58,0.15); color:#ff6b63; border:1px solid rgba(232,65,58,0.3); }
+  .chip-blue { background:rgba(58,126,232,0.12); color:#6ba8ff; border:1px solid rgba(58,126,232,0.25); }
+  .chip-green { background:rgba(58,232,122,0.1); color:#5df59a; border:1px solid rgba(58,232,122,0.2); }
+  .chip-orange { background:rgba(232,124,58,0.12); color:#ffaa6b; border:1px solid rgba(232,124,58,0.25); }
+  .chip-yellow { background:rgba(232,200,58,0.1); color:#ffe06b; border:1px solid rgba(232,200,58,0.2); }
+
+  .kine-banner { margin:32px 40px; padding:20px 24px; background:linear-gradient(135deg,rgba(232,124,58,0.08),rgba(232,65,58,0.06)); border:1px solid rgba(232,124,58,0.25); border-left:3px solid var(--orange); border-radius:8px; display:flex; gap:16px; align-items:flex-start; }
+  .kine-banner-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+  .kine-banner-title { font-size:13px; font-weight:600; color:#ffaa6b; margin-bottom:6px; letter-spacing:0.5px; text-transform:uppercase; }
+  .kine-banner p { font-size:13.5px; color:var(--muted); line-height:1.6; }
+  .kine-banner strong { color:var(--text); }
+
+  .nav { position:sticky; top:0; z-index:100; background:rgba(10,10,10,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:0 40px; display:flex; gap:0; overflow-x:auto; }
+  .nav-tab { padding:18px 24px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; white-space:nowrap; letter-spacing:0.3px; background:none; border-top:none; border-left:none; border-right:none; font-family:'DM Sans',sans-serif; }
+  .nav-tab:hover { color:var(--text); }
+  .nav-tab.active { color:var(--red); border-bottom-color:var(--red); }
+
+  .content { padding:40px; max-width:1100px; margin:0 auto; }
+  .section { display:none; }
+  .section.active { display:block; animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:40px; }
+  .week-day { padding:16px 8px; border-radius:10px; text-align:center; border:1px solid var(--border); background:var(--card); transition:transform 0.2s; }
+  .week-day:hover { transform:translateY(-2px); }
+  .week-day-name { font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+  .week-day-content { font-size:11px; font-weight:600; }
+  .week-day-icon { font-size:20px; margin-bottom:6px; }
+  .week-day.muscu1 { border-color:rgba(232,65,58,0.4); background:rgba(232,65,58,0.07); }
+  .week-day.muscu1 .week-day-content { color:#ff6b63; }
+  .week-day.muscu2 { border-color:rgba(58,126,232,0.4); background:rgba(58,126,232,0.07); }
+  .week-day.muscu2 .week-day-content { color:#6ba8ff; }
+  .week-day.rugby { border-color:rgba(58,232,122,0.4); background:rgba(58,232,122,0.07); }
+  .week-day.rugby .week-day-content { color:#5df59a; }
+  .week-day.run { border-color:rgba(232,200,58,0.35); background:rgba(232,200,58,0.06); }
+  .week-day.run .week-day-content { color:#ffe06b; }
+  .week-day.rest { opacity:0.4; }
+  .week-day.rest .week-day-content { color:var(--muted); }
+
+  .section-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:42px; letter-spacing:1px; margin-bottom:6px; }
+  .section-desc { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:32px; max-width:640px; }
+
+  .exercises { display:flex; flex-direction:column; gap:16px; }
+  .ex-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:border-color 0.2s; }
+  .ex-card:hover { border-color:#3a3f4d; }
+  .ex-header { padding:20px 24px; display:flex; align-items:center; gap:16px; cursor:pointer; user-select:none; }
+  .ex-num { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--border); line-height:1; min-width:36px; }
+  .ex-color-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .ex-info { flex:1; }
+  .ex-name { font-size:16px; font-weight:600; margin-bottom:4px; }
+  .ex-tags { display:flex; gap:6px; flex-wrap:wrap; }
+  .ex-tag { font-size:10px; padding:3px 8px; border-radius:4px; font-family:'DM Mono',monospace; letter-spacing:0.5px; }
+  .ex-tag-rugby { background:rgba(58,232,122,0.1); color:#5df59a; }
+  .ex-tag-pecs { background:rgba(232,65,58,0.12); color:#ff8a85; }
+  .ex-tag-bras { background:rgba(58,126,232,0.12); color:#6ba8ff; }
+  .ex-tag-dos { background:rgba(155,58,232,0.12); color:#c47fff; }
+  .ex-tag-epaule { background:rgba(232,200,58,0.1); color:#ffe06b; }
+  .ex-tag-new { background:rgba(58,232,122,0.2); color:#3ae87a; border:1px solid rgba(58,232,122,0.3); }
+  .ex-badge-new { font-size:9px; padding:3px 8px; background:rgba(58,232,122,0.15); color:#3ae87a; border:1px solid rgba(58,232,122,0.3); border-radius:4px; font-weight:700; letter-spacing:1px; font-family:'DM Mono',monospace; }
+  .ex-chevron { color:var(--muted); font-size:18px; transition:transform 0.25s; }
+  .ex-card.open .ex-chevron { transform:rotate(180deg); }
+  .ex-body { display:none; padding:0 24px 24px; border-top:1px solid var(--border); }
+  .ex-card.open .ex-body { display:block; }
+
+  .sets-section { margin-top:20px; }
+  .sets-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+  .sets-table { width:100%; border-collapse:collapse; }
+  .sets-table th { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); font-weight:500; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); font-family:'DM Mono',monospace; }
+  .sets-table td { padding:12px; font-size:14px; border-bottom:1px solid rgba(42,47,58,0.5); vertical-align:middle; }
+  .sets-table tr:last-child td { border-bottom:none; }
+  .sets-table tr:hover td { background:rgba(255,255,255,0.02); }
+  .serie-badge { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--muted); }
+  .reps-range { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; }
+  .weight-input { background:var(--card2); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'DM Mono',monospace; font-size:13px; padding:6px 10px; width:80px; text-align:center; transition:border-color 0.2s; }
+  .weight-input:focus { outline:none; border-color:var(--red); }
+  .weight-unit { font-size:11px; color:var(--muted); margin-left:4px; }
+  .rest-badge { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); background:var(--card2); padding:3px 8px; border-radius:4px; }
+
+  .tech-notes { margin-top:20px; padding:16px; background:var(--card2); border-radius:8px; border-left:2px solid var(--blue); }
+  .tech-notes-title { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#6ba8ff; margin-bottom:10px; font-family:'DM Mono',monospace; }
+  .tech-notes ul { list-style:none; }
+  .tech-notes li { font-size:13px; color:var(--muted); padding:4px 0 4px 16px; position:relative; line-height:1.5; }
+  .tech-notes li::before { content:'→'; position:absolute; left:0; color:#3a7ee8; font-size:11px; }
+
+  .kine-note { margin-top:12px; padding:12px 16px; background:rgba(232,124,58,0.06); border-radius:8px; border-left:2px solid var(--orange); font-size:13px; color:var(--muted); line-height:1.5; }
+  .kine-note strong { color:#ffaa6b; }
+  .rugby-note { margin-top:12px; padding:12px 16px; background:rgba(58,232,122,0.05); border-radius:8px; border-left:2px solid var(--green); font-size:13px; color:var(--muted); line-height:1.5; }
+  .rugby-note strong { color:#5df59a; }
+
+  .alt-section { margin-top:16px; }
+  .alt-title { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; font-family:'DM Mono',monospace; }
+  .alt-item { padding:10px 12px; background:var(--card2); border-radius:6px; font-size:13px; color:var(--muted); margin-bottom:6px; }
+
+  .divider { height:1px; background:var(--border); margin:40px 0; }
+
+  .conseil-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-top:24px; }
+  .conseil-card { padding:24px; background:var(--card); border:1px solid var(--border); border-radius:12px; }
+  .conseil-card-icon { font-size:28px; margin-bottom:12px; }
+  .conseil-card-title { font-size:14px; font-weight:600; margin-bottom:8px; }
+  .conseil-card p { font-size:13px; color:var(--muted); line-height:1.6; }
+  .conseil-card strong { color:var(--text); }
+
+  .prog-table { width:100%; border-collapse:collapse; margin-top:16px; }
+  .prog-table th { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); font-weight:500; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); font-family:'DM Mono',monospace; background:var(--card2); }
+  .prog-table td { padding:12px 14px; font-size:13px; border-bottom:1px solid rgba(42,47,58,0.5); }
+  .prog-table tr:last-child td { border-bottom:none; }
+  .prog-up { color:#5df59a; font-weight:600; }
+  .prog-same { color:var(--muted); }
+
+  .superset-connector { display:flex; align-items:center; gap:12px; padding:6px 24px; font-size:11px; color:var(--purple); font-family:'DM Mono',monospace; letter-spacing:1px; }
+  .superset-connector::before, .superset-connector::after { content:''; flex:1; height:1px; background:rgba(155,58,232,0.3); }
+
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:var(--black); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  @media (max-width:768px) {
+    .header { padding:40px 20px 30px; }
+    .content { padding:24px 20px; }
+    .nav { padding:0 20px; }
+    .kine-banner { margin:20px; }
+    .week-grid { grid-template-columns:repeat(4,1fr); }
+  }
+
+  /* SAVE TOAST */
+  #save-toast {
+    position:fixed; bottom:28px; right:28px; z-index:9999;
+    background:#1c2028; border:1px solid rgba(58,232,122,0.4);
+    border-left:3px solid var(--green);
+    color:#5df59a; font-family:'DM Mono',monospace; font-size:12px;
+    padding:12px 20px; border-radius:8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    opacity:0; transform:translateY(12px);
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events:none;
+  }
+  #save-toast.visible { opacity:1; transform:translateY(0); }
+
+  /* SAVE BAR */
+  .save-bar {
+    position:sticky; bottom:0; z-index:99;
+    background:rgba(10,10,10,0.96); backdrop-filter:blur(12px);
+    border-top:1px solid var(--border);
+    padding:12px 40px; display:flex; align-items:center; justify-content:space-between;
+    gap:16px;
+  }
+  .save-bar-info { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .save-bar-info span { color:#5df59a; }
+  .btn-save { padding:9px 20px; background:rgba(58,232,122,0.12); border:1px solid rgba(58,232,122,0.3); color:#5df59a; border-radius:6px; font-size:12px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.2s; letter-spacing:0.5px; }
+  .btn-save:hover { background:rgba(58,232,122,0.2); }
+  .btn-reset { padding:9px 16px; background:rgba(232,65,58,0.08); border:1px solid rgba(232,65,58,0.2); color:#ff6b63; border-radius:6px; font-size:12px; font-family:'DM Mono',monospace; cursor:pointer; transition:all 0.2s; letter-spacing:0.5px; }
+  .btn-reset:hover { background:rgba(232,65,58,0.15); }
+  @media (max-width:600px) { .save-bar { padding:10px 20px; } .save-bar-info { display:none; } }
+  /* STRAVA */
+  .strava-orange { color: #FC4C02; }
+  .strava-btn { display:inline-flex; align-items:center; gap:10px; padding:13px 24px; background:#FC4C02; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; transition:background 0.2s; font-family:'DM Sans',sans-serif; }
+  .strava-btn:hover { background:#e04400; }
+  .strava-btn svg { width:20px; height:20px; fill:#fff; }
+  .strava-connected { display:flex; align-items:center; gap:12px; padding:14px 18px; background:rgba(252,76,2,0.08); border:1px solid rgba(252,76,2,0.25); border-radius:8px; }
+  .strava-avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+  .strava-avatar-placeholder { width:40px; height:40px; border-radius:50%; background:rgba(252,76,2,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .strava-name { font-weight:600; font-size:14px; }
+  .strava-label { font-size:11px; color:#FC4C02; font-family:'DM Mono',monospace; letter-spacing:1px; }
+  .btn-disconnect { margin-left:auto; padding:6px 12px; background:transparent; border:1px solid rgba(255,107,99,0.3); color:#ff6b63; border-radius:6px; font-size:11px; cursor:pointer; font-family:'DM Mono',monospace; transition:all 0.2s; }
+  .btn-disconnect:hover { background:rgba(232,65,58,0.1); }
+  .config-form { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+  .config-input { background:var(--card2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Mono',monospace; font-size:13px; padding:12px 14px; width:100%; transition:border-color 0.2s; }
+  .config-input:focus { outline:none; border-color:#FC4C02; }
+  .config-input::placeholder { color:var(--muted); }
+  .config-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; font-family:'DM Mono',monospace; }
+  .run-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:20px; }
+  .run-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; transition:border-color 0.2s; }
+  .run-card:hover { border-color:#FC4C02; }
+  .run-card-date { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; margin-bottom:8px; }
+  .run-card-name { font-size:15px; font-weight:600; margin-bottom:14px; }
+  .run-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .run-stat { text-align:center; padding:10px 6px; background:var(--card2); border-radius:8px; }
+  .run-stat-val { font-family:'Bebas Neue',sans-serif; font-size:22px; color:#FC4C02; line-height:1; }
+  .run-stat-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px; font-family:'DM Mono',monospace; }
+  .run-stat-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+  .run-card-type { display:inline-block; font-size:9px; padding:2px 8px; background:rgba(252,76,2,0.1); color:#FC4C02; border-radius:4px; font-family:'DM Mono',monospace; letter-spacing:1px; margin-top:12px; }
+  .run-card-hr { font-size:11px; color:var(--muted); margin-top:8px; display:flex; align-items:center; gap:6px; }
+  .heart { color:#ff6b63; }
+  .loading-runs { text-align:center; padding:48px; color:var(--muted); font-family:'DM Mono',monospace; font-size:13px; }
+  .loading-runs .spin { display:inline-block; width:24px; height:24px; border:2px solid var(--border); border-top-color:#FC4C02; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .empty-runs { text-align:center; padding:48px; color:var(--muted); }
+  .empty-runs-icon { font-size:48px; margin-bottom:12px; }
+  .run-summary-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
+  .run-summary-card { padding:18px; background:var(--card); border:1px solid var(--border); border-radius:10px; text-align:center; }
+  .run-summary-val { font-family:'Bebas Neue',sans-serif; font-size:28px; color:#FC4C02; line-height:1; }
+  .run-summary-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; font-family:'DM Mono',monospace; }
+  .strava-link { color:#FC4C02; text-decoration:none; font-size:11px; font-family:'DM Mono',monospace; }
+  .strava-link:hover { text-decoration:underline; }
+  @media(max-width:600px) { .run-summary-bar { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">Préparateur Physique × Kiné — Programme Personnalisé</div>
+  <h1>PROGRAMME<br><span>RUGBY</span><br>MUSCU</h1>
+  <p class="header-sub">Optimisé pour le poste de <strong>demi de mêlée</strong> — Équilibre performance terrain / développement physique. Structure pyramidale inversée conservée.</p>
+  <div class="profile-chips">
+    <span class="chip chip-red">🏉 Demi de mêlée</span>
+    <span class="chip chip-blue">💪 2 séances/sem</span>
+    <span class="chip chip-green">⚡ Pecs & Bras prioritaires</span>
+    <span class="chip chip-orange">🦵 Post syndrome essuie-glace</span>
+    <span class="chip chip-yellow">⚠️ Épaule droite — vigilance</span>
+  </div>
+</div>
+
+<div class="kine-banner">
+  <div class="kine-banner-icon">🩺</div>
+  <div>
+    <div class="kine-banner-title">Note du kiné — Précautions actives</div>
+    <p>
+      <strong>Épaule droite :</strong> Évite les élévations latérales lourdes et l'OHP lourd les premières semaines. Remplace par les variantes indiquées. Travaille la coiffe des rotateurs en échauffement (rotations externes légères, band pull-apart).<br><br>
+      <strong>Syndrome essuie-glace (genou) :</strong> Pas d'exercice lower body à fort cisaillement. Renforcement progressif proposé dans la section Conditioning. <strong>Écoute tes sensations à chaque séance.</strong>
+    </p>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="showSection('overview',this)">🗓 Vue d'ensemble</button>
+  <button class="nav-tab" onclick="showSection('seance1',this)">🔴 Séance A — Pecs & Dos</button>
+  <button class="nav-tab" onclick="showSection('seance2',this)">🔵 Séance B — Bras & Épaules</button>
+  <button class="nav-tab" onclick="showSection('seancejambes',this)">🦵 Séance C — Jambes</button>
+  <button class="nav-tab" onclick="showSection('abdos',this)">🔥 Circuit Abdos</button>
+  <button class="nav-tab" onclick="showSection('conditioning',this)">⚡ Conditioning</button>
+  <button class="nav-tab" id="tab-course" onclick="showSection('course',this)">🏃 Course</button>
+  <button class="nav-tab" onclick="showSection('progression',this)">📈 Progression</button>
+</nav>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="overview">
+    <div class="section-label">Organisation hebdomadaire</div>
+    <div class="section-title">SEMAINE TYPE</div>
+    <p class="section-desc">5 jours actifs, 1 récup flexible. Le jeudi alterne séance jambes légère et/ou sortie course selon la fatigue post-entraînement du mercredi. Samedi/dimanche modulable selon les matchs.</p>
+    <div style="margin-bottom:16px; padding:14px 18px; background:rgba(58,232,122,0.05); border:1px solid rgba(58,232,122,0.2); border-left:3px solid var(--green); border-radius:8px; font-size:13px; color:var(--muted); line-height:1.6;">
+      <strong style="color:#5df59a;">🦵 Jeudi — Séance jambes / Course :</strong> Si fatigue importante après l'entraînement du mercredi, privilégie la course légère (30–40 min, allure confortable). Si jambes fraîches, fais la séance jambes avec les exercices de renforcement préventifs (clamshell, split squat, gainage). Les deux peuvent aussi être combinés si tu te sens bien : 20 min course + 25 min renfo.
+    </div>
+    <div class="week-grid">
+      <div class="week-day run"><div class="week-day-icon">🏃</div><div class="week-day-name">Lun</div><div class="week-day-content">COURSE<br>à pied</div></div>
+      <div class="week-day muscu1"><div class="week-day-icon">💪</div><div class="week-day-name">Mar</div><div class="week-day-content">SÉANCE A<br>Pecs & Dos</div></div>
+      <div class="week-day rugby"><div class="week-day-icon">🏉</div><div class="week-day-name">Mer</div><div class="week-day-content">ENTRAÎ-<br>NEMENT</div></div>
+      <div class="week-day run"><div class="week-day-icon">🦵</div><div class="week-day-name">Jeu</div><div class="week-day-content">JAMBES /<br>COURSE</div></div>
+      <div class="week-day muscu2"><div class="week-day-icon">🔵</div><div class="week-day-name">Ven</div><div class="week-day-content">SÉANCE B<br>Bras & Ép.</div></div>
+      <div class="week-day rugby"><div class="week-day-icon">🏉</div><div class="week-day-name">Sam</div><div class="week-day-content">MATCH /<br>SORTIE</div></div>
+      <div class="week-day rest"><div class="week-day-icon">🔄</div><div class="week-day-name">Dim</div><div class="week-day-content">RÉCUP /<br>SORTIE</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-label">Ce qui change par rapport à ton programme</div>
+    <div class="section-title" style="font-size:32px;">ANALYSE & ÉVOLUTIONS</div>
+    <div class="conseil-grid">
+      <div class="conseil-card">
+        <div class="conseil-card-icon">🎯</div>
+        <div class="conseil-card-title">Rééquilibrage du volume</div>
+        <p><strong>Pecs +40% de volume</strong> — Ajout écarté haltères + dips lestés structurés.<br><br><strong>Bras +30%</strong> — Curl ET triceps travaillés ensemble en superset (biceps seul avant, triceps pas du tout).<br><br><strong>Épaules –40%</strong> — Maintenance, exercices préventifs prioritaires.<br><br><strong>Dos</strong> — Maintenu en exercice secondaire.</p>
+      </div>
+      <div class="conseil-card">
+        <div class="conseil-card-icon">🏉</div>
+        <div class="conseil-card-title">Spécificité Demi de mêlée</div>
+        <p>La <strong>passe</strong> sollicite triceps + deltoïde antérieur à vitesse maximale. Les <strong>plaquages</strong> exigent une chaîne postérieure solide et des pecs explosifs. Le <strong>dégagement au sol</strong> mobilise pecs + core + épaule. Ces patterns sont intégrés dans la sélection d'exercices et les tempos.</p>
+      </div>
+      <div class="conseil-card">
+        <div class="conseil-card-icon">🩺</div>
+        <div class="conseil-card-title">Gestion épaule droite</div>
+        <p>L'OHP lourd est <strong>remplacé par le Landmine Press</strong> — même recrutement musculaire mais trajectoire oblique qui réduit la compression sous-acromiale. Les élévations latérales sont allégées. Le <strong>Face pull est rendu obligatoire</strong> en fin de séance A pour rééquilibrer la coiffe.</p>
+      </div>
+      <div class="conseil-card">
+        <div class="conseil-card-icon">⚡</div>
+        <div class="conseil-card-title">Explosivité conservée</div>
+        <p>La pyramide inversée est maintenue — elle correspond parfaitement au profil neuromusculaire du rugby. Les <strong>tempos explosifs sur la phase concentrique</strong> sont maintenus voire accentués. C'est ce qui développe la puissance de passe et la réactivité en contact.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SÉANCE A -->
+  <div class="section" id="seance1">
+    <div class="section-label">Séance A — Lundi</div>
+    <div class="section-title" style="color:#ff6b63;">PECS & DOS</div>
+    <p class="section-desc">Développement prioritaire des pectoraux. Dos en maintien de qualité. Face pull obligatoire en fin de séance. Durée estimée : <strong>60–70 min</strong>.</p>
+    <div class="exercises">
+
+      <div class="ex-card" id="ex-a1">
+        <div class="ex-header" onclick="toggleEx('ex-a1')">
+          <div class="ex-num">01</div>
+          <div class="ex-color-dot" style="background:#ff6b63;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Développé incliné barre</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-pecs">PECS</span><span class="ex-tag ex-tag-rugby">RUGBY</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Repos 2'30</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Poids de travail</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">4–6 rep</span> <small style="color:var(--muted)">charge max</small></td><td><input class="weight-input" type="text" value="65" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">6–8 rep</span> <small style="color:var(--muted)">–10%</small></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">8–10 rep</span> <small style="color:var(--muted)">–10%</small></td><td><input class="weight-input" type="text" value="55" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Banc 15–30°, prise largeur épaules, coudes à 45°</li>
+              <li>Rétraction scapulaire, jambes ancrées, poignets droits</li>
+              <li>Descente contrôlée 2–3s, remontée <strong>explosive</strong></li>
+              <li>Barre touche le haut des pectoraux à chaque rep</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Pourquoi cet exercice :</strong> Le développé incliné reproduit l'angle de poussée lors des plaquages hauts et des décrochages. Phase concentrique explosive = transfert direct sur le terrain.</div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternative</div>
+            <div class="alt-item">Développé incliné haltères — 18kg / 16kg / 14kg × mêmes séries</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-a2">
+        <div class="ex-header" onclick="toggleEx('ex-a2')">
+          <div class="ex-num">02</div>
+          <div class="ex-color-dot" style="background:#ff6b63;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Écarté haltères plat</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-pecs">PECS</span><span class="ex-tag ex-tag-new">✦ NOUVEAU</span></div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries classiques — Repos 1'30</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Poids de travail</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffe06b;">12 rep</span></td><td><input class="weight-input" type="text" value="14" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffe06b;">12 rep</span></td><td><input class="weight-input" type="text" value="14" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">12 rep</span></td><td><input class="weight-input" type="text" value="14" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Coudes légèrement fléchis (10–15°), ne jamais verrouiller</li>
+              <li>Descente jusqu'à l'étirement profond des pecs — pas plus bas que les épaules</li>
+              <li>Remontée en arc de cercle, penser à "embrasser un arbre"</li>
+              <li>Contraction isométrique 1s en haut</li>
+            </ul>
+          </div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Exercice peu contraignant pour l'épaule droite si la charge reste modérée et le mouvement contrôlé. Si tension antérieure à l'épaule en phase d'étirement → réduis l'amplitude immédiatement.</div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-a3">
+        <div class="ex-header" onclick="toggleEx('ex-a3')">
+          <div class="ex-num">03</div>
+          <div class="ex-color-dot" style="background:#ff6b63;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Développé couché barre</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-pecs">PECS</span><span class="ex-tag ex-tag-rugby">RUGBY</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Repos 2'</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Poids de travail</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">4–6 rep</span></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">6–8 rep</span></td><td><input class="weight-input" type="text" value="55" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">8–10 rep</span></td><td><input class="weight-input" type="text" value="50" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Pieds ancrés, fesses collées au banc, rétraction scapulaire</li>
+              <li>Prise légèrement plus large que les épaules</li>
+              <li>Descente contrôlée, barre touche la poitrine basse</li>
+              <li>Phase concentrique explosive — tempo 2–0–X</li>
+            </ul>
+          </div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternative</div>
+            <div class="alt-item">Développé couché haltères — commence 5kg en dessous du développé incliné</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-a4">
+        <div class="ex-header" onclick="toggleEx('ex-a4')">
+          <div class="ex-num">04</div>
+          <div class="ex-color-dot" style="background:#c47fff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Dips lestés — Focus pecs</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-pecs">PECS</span><span class="ex-tag ex-tag-bras">TRICEPS</span><span class="ex-tag ex-tag-new">✦ NOUVEAU</span></div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Repos 2'</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Lest</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">6–8 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">8–10 rep</span></td><td><input class="weight-input" type="text" value="5" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">10–12 rep</span></td><td><input class="weight-input" type="text" value="PDC" /></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique — Version pecs</div>
+            <ul>
+              <li>Buste penché en avant (30–45°) pour cibler les pecs plutôt que le triceps</li>
+              <li>Coudes qui s'ouvrent légèrement vers l'extérieur</li>
+              <li>Descente jusqu'à ce que les bras soient parallèles au sol</li>
+              <li>Ne pas verrouiller les coudes en haut</li>
+            </ul>
+          </div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Si douleur à l'épaule droite → commence en PDC uniquement les 2 premières semaines. Les dips peuvent être contraignants pour la capsule antérieure. Arrête au premier signal douloureux.</div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-a5">
+        <div class="ex-header" onclick="toggleEx('ex-a5')">
+          <div class="ex-num">05</div>
+          <div class="ex-color-dot" style="background:#c47fff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Tractions pronation — Maintien dos</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-dos">DOS</span><span class="ex-tag ex-tag-rugby">RUGBY</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries classiques — Repos 2' — Volume réduit (maintien)</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Lest / Assist</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffe06b;">6–8 rep</span></td><td><input class="weight-input" type="text" value="PDC" /></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffe06b;">6–8 rep</span></td><td><input class="weight-input" type="text" value="PDC" /></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">6–8 rep</span></td><td><input class="weight-input" type="text" value="PDC" /></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Rétraction scapulaire avant de tirer — initiation par les omoplates</li>
+              <li>Poitrine vers la barre, pas le menton</li>
+              <li>Descente complète et contrôlée</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Note :</strong> Volume réduit par rapport à ton ancien programme — le dos est déjà bien développé. Les tractions restent essentielles pour la stabilité en plaquage et la résistance aux contacts.</div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternatives</div>
+            <div class="alt-item">Tirage vertical — 46kg / 43kg / 40kg</div>
+            <div class="alt-item">Rowing haltère unilatéral (bucheron) — 20kg × 3×10</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-a6">
+        <div class="ex-header" onclick="toggleEx('ex-a6')">
+          <div class="ex-num">06</div>
+          <div class="ex-color-dot" style="background:#ffe06b;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Face pull poulie — Coiffe des rotateurs ⚠️ OBLIGATOIRE</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-epaule">ÉPAULE</span><span class="ex-tag ex-tag-dos">DOS HAUT</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries légères — Repos 1' — Exercice préventif</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="15" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="15" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="15" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Poulie à hauteur des yeux, corde avec 2 mains</li>
+              <li>Tirer vers le front, coudes hauts — rotation externe maximale</li>
+              <li>Contraction 2s en fin de mouvement</li>
+              <li>Charge légère, pas d'ego — exercice de santé</li>
+            </ul>
+          </div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Cet exercice est <strong>non négociable</strong> en fin de séance A. Il rééquilibre la coiffe des rotateurs après le volume de poussée des pecs et protège ton épaule droite sur la durée. Alternative : Oiseau haltères léger (8kg × 15 rep).</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SÉANCE B -->
+  <div class="section" id="seance2">
+    <div class="section-label">Séance B — Jeudi</div>
+    <div class="section-title" style="color:#6ba8ff;">BRAS & ÉPAULES</div>
+    <p class="section-desc">Volume bras fortement augmenté — biceps ET triceps structurés ensemble. Épaules en maintenance prudente. Durée estimée : <strong>55–65 min</strong>.</p>
+    <div class="exercises">
+
+      <div class="ex-card" id="ex-b1">
+        <div class="ex-header" onclick="toggleEx('ex-b1')">
+          <div class="ex-num">01</div>
+          <div class="ex-color-dot" style="background:#ffe06b;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Landmine Press — Remplace l'OHP</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-epaule">ÉPAULE</span><span class="ex-tag ex-tag-pecs">PECS HT</span><span class="ex-tag ex-tag-new">✦ NOUVEAU</span></div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Repos 2' — Remplace temporairement l'OHP</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Poids barre</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">5–6 rep</span></td><td><input class="weight-input" type="text" value="30" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">7–8 rep</span></td><td><input class="weight-input" type="text" value="25" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">9–10 rep</span></td><td><input class="weight-input" type="text" value="20" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Barre fixée dans un coin ou support landmine</li>
+              <li>Debout en fente, saisir l'extrémité à 2 mains (ou 1 main en alternant)</li>
+              <li>Pousser en arc légèrement vers l'avant-haut — trajectoire naturelle</li>
+              <li>Moins de compression articulaire qu'un OHP vertical</li>
+            </ul>
+          </div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> La trajectoire oblique du Landmine réduit fortement la compression sous-acromiale. Idéal pendant la récupération épaule. Si pas disponible → Développé haltères assis (20/18/16kg), dos bien appuyé, coudes à 45°.</div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> La presse en arc de cercle correspond au pattern moteur des passes longues et des dégagements de pied — excellent transfert terrain.</div>
+        </div>
+      </div>
+
+      <div style="padding:8px 0;">
+        <div class="superset-connector">⚡ SUPERSET — Biceps × Triceps (3 rounds)</div>
+      </div>
+
+      <div class="ex-card" id="ex-b2">
+        <div class="ex-header" onclick="toggleEx('ex-b2')">
+          <div class="ex-num">02A</div>
+          <div class="ex-color-dot" style="background:#6ba8ff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Curl barre droite</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-bras">BICEPS</span><span class="ex-tag ex-tag-new">✦ NOUVEAU</span></div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Enchaîner directement avec le 02B</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Transition</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">6–8 rep</span></td><td><input class="weight-input" type="text" value="30" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">→ 02B direct</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">8–10 rep</span></td><td><input class="weight-input" type="text" value="27" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">→ 02B direct</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">10–12 rep</span></td><td><input class="weight-input" type="text" value="24" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">→ 02B direct</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Coudes collés aux hanches, immobiles pendant tout le mouvement</li>
+              <li>Supination complète en fin de montée</li>
+              <li>Descente lente et contrôlée 3s — c'est là que le biceps grandit</li>
+              <li>Zéro élan du buste</li>
+            </ul>
+          </div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternative</div>
+            <div class="alt-item">Curl incliné haltères — 10kg / 8kg / 6kg (ton exercice existant)</div>
+            <div class="alt-item">Curl marteau haltères — 10kg × 3 séries, prise neutre</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-b2b">
+        <div class="ex-header" onclick="toggleEx('ex-b2b')">
+          <div class="ex-num">02B</div>
+          <div class="ex-color-dot" style="background:#6ba8ff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Triceps pushdown corde (poulie haute)</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-bras">TRICEPS</span><span class="ex-tag ex-tag-new">✦ NOUVEAU</span></div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">En superset avec 02A — Repos 2' après les 2 exercices</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">8–10 rep</span></td><td><input class="weight-input" type="text" value="25" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2' repos total</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">10–12 rep</span></td><td><input class="weight-input" type="text" value="22" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2' repos total</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">12–15 rep</span></td><td><input class="weight-input" type="text" value="20" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Coudes fixes et collés au corps tout au long du mouvement</li>
+              <li>Extension complète avec écartement de la corde en bas</li>
+              <li>Contraction 1s en bas, remontée contrôlée</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> Le triceps est le <strong>moteur principal de la passe de demi de mêlée</strong>. Un triceps fort = passes plus rapides, plus précises, plus longues. C'est l'exercice analytique le plus utile pour ton poste.</div>
+        </div>
+      </div>
+
+      <div style="padding:4px 0;">
+        <div class="superset-connector" style="color:var(--muted);">— fin superset — 3 rounds complétés</div>
+      </div>
+
+      <div class="ex-card" id="ex-b3">
+        <div class="ex-header" onclick="toggleEx('ex-b3')">
+          <div class="ex-num">03</div>
+          <div class="ex-color-dot" style="background:#6ba8ff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Skull Crusher barre EZ</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-bras">TRICEPS LONG</span><span class="ex-tag ex-tag-new">✦ NOUVEAU</span></div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries classiques — Repos 1'30</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffe06b;">10–12 rep</span></td><td><input class="weight-input" type="text" value="20" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffe06b;">10–12 rep</span></td><td><input class="weight-input" type="text" value="20" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">12 rep</span></td><td><input class="weight-input" type="text" value="17" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Allongé sur banc plat, barre EZ au-dessus du front, bras tendus</li>
+              <li>Descendre la barre vers le front en pliant seulement les coudes</li>
+              <li>Coudes fixes et pointés vers le plafond</li>
+              <li>Extension complète sans verrouiller, contrôle total</li>
+            </ul>
+          </div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternative</div>
+            <div class="alt-item">Extensions triceps haltère 1 bras — 12kg × 3×12</div>
+            <div class="alt-item">Dips banc (poids du corps) — 3×15</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-b4">
+        <div class="ex-header" onclick="toggleEx('ex-b4')">
+          <div class="ex-num">04</div>
+          <div class="ex-color-dot" style="background:#ffe06b;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Curl incliné haltères — Pic de contraction</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-bras">BICEPS</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries classiques — Repos 1'30</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range">10 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range">10 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range">10 rep</span></td><td><input class="weight-input" type="text" value="8" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Banc incliné 45–60°, bras qui pendent derrière le corps = étirement maximal</li>
+              <li>Départ prise neutre, supination en montant</li>
+              <li>Pieds ancrés, bras jamais totalement tendus</li>
+              <li>Contrôle complet dans la descente</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-b5">
+        <div class="ex-header" onclick="toggleEx('ex-b5')">
+          <div class="ex-num">05</div>
+          <div class="ex-color-dot" style="background:#ffe06b;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Élévations latérales — Maintenance épaule</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-epaule">ÉPAULE</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries légères — Charges réduites volontairement — Repos 1'</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="8" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="8" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Charges volontairement allégées (14kg → 8kg). L'épaule droite doit être gérée. Priorité à l'amplitude et à la contraction sur la charge. Si inconfort → élévations poulie basse, trajectoire plus gentle pour l'articulation.</div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Monter les coudes, pas les poignets — poignets légèrement bas</li>
+              <li>Légèrement penché en avant pour cibler le deltoïde moyen</li>
+              <li>Pic de contraction 1s en haut</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-b6">
+        <div class="ex-header" onclick="toggleEx('ex-b6')">
+          <div class="ex-num">06</div>
+          <div class="ex-color-dot" style="background:#c47fff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Oiseau assis haltères — Deltoïde postérieur</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-dos">DOS HAUT</span><span class="ex-tag ex-tag-epaule">ÉPAULE POST.</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries classiques — Repos 1' — Exercice conservé</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range">15 rep</span></td><td><input class="weight-input" type="text" value="10" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Assis, penché en avant, tête entre les genoux</li>
+              <li>Coudes ouverts à 90°, ne pas coller au corps</li>
+              <li>Ne pas lever trop haut — hauteur épaules max</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SÉANCE JAMBES -->
+  <div class="section" id="seancejambes">
+    <div class="section-label">Séance C — Jeudi</div>
+    <div class="section-title" style="color:#5df59a;">JAMBES & EXPLOSIVITÉ</div>
+    <p class="section-desc">Renforcement complet des membres inférieurs + développement de la puissance explosive spécifique rugby. Durée estimée : <strong>55–65 min</strong>. Précautions genou intégrées.</p>
+
+    <div class="kine-banner" style="margin:0 0 32px 0;">
+      <div class="kine-banner-icon">🩺</div>
+      <div>
+        <div class="kine-banner-title">Note kiné — Genou post-ITB</div>
+        <p>Le syndrome de l'essuie-glace guéri, on peut charger progressivement. <strong>Évite le leg extension isolé</strong> (cisaillement pur sur le genou). Privilegié les mouvements multi-articulaires avec contrôle excentrique. <strong>Douleur latérale genou = stop immédiat</strong> sur l'exercice en cours.</p>
+      </div>
+    </div>
+
+    <div class="exercises">
+
+      <!-- BLOC 1 : FORCE -->
+      <div style="padding:4px 0 8px;">
+        <div class="superset-connector" style="color:#5df59a;">💪 BLOC 1 — FORCE (20 min)</div>
+      </div>
+
+      <div class="ex-card" id="ex-j1">
+        <div class="ex-header" onclick="toggleEx('ex-j1')">
+          <div class="ex-num">01</div>
+          <div class="ex-color-dot" style="background:#5df59a;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Squat barre (ou goblet squat)</div>
+            <div class="ex-tags">
+              <span class="ex-tag ex-tag-rugby">RUGBY</span>
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">QUADRI</span>
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">FESSIERS</span>
+            </div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Repos 2'30</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">4–5 rep</span> <small style="color:var(--muted)">charge max</small></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">6–7 rep</span> <small style="color:var(--muted)">–10%</small></td><td><input class="weight-input" type="text" value="55" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">8–10 rep</span> <small style="color:var(--muted)">–10%</small></td><td><input class="weight-input" type="text" value="50" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Pieds largeur épaules, légèrement en canard (10–20°)</li>
+              <li>Descente en contrôle (3s), cuisse parallèle au sol minimum</li>
+              <li>Genoux dans l'axe des orteils — ne pas laisser valgus</li>
+              <li>Remontée <strong>explosive</strong> — pousse le sol vers le bas</li>
+              <li>Respiration : inspire en descente, expire en force lors de la remontée</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> Le squat est la base de l'explosivité en mêlée et en accélération. La poussée verticale se transfère directement sur le départ de sprint et la puissance en touche.</div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Commence à 60kg les premières semaines — priorité à la profondeur et au contrôle avant d'augmenter. Si douleur latérale du genou, passe au <strong>goblet squat haltère</strong> (charge devant = moins de contrainte sur l'ITB).</div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternative</div>
+            <div class="alt-item">Goblet squat haltère — 20/24/28kg × mêmes séries</div>
+            <div class="alt-item">Leg press — 80/70/60kg (si genou sensible)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-j2">
+        <div class="ex-header" onclick="toggleEx('ex-j2')">
+          <div class="ex-num">02</div>
+          <div class="ex-color-dot" style="background:#5df59a;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Romanian Deadlift (RDL)</div>
+            <div class="ex-tags">
+              <span class="ex-tag ex-tag-rugby">RUGBY</span>
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">ISCHIO</span>
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">FESSIERS</span>
+            </div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">Séries pyramidales — Repos 2'</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ff6b63;">5–6 rep</span></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">7–8 rep</span></td><td><input class="weight-input" type="text" value="55" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">8–10 rep</span></td><td><input class="weight-input" type="text" value="50" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Barre contre les cuisses, jambes quasi tendues (légère flexion genou)</li>
+              <li>Charnière aux hanches — <strong>ne pas fléchir le dos</strong>, pousser les fessiers en arrière</li>
+              <li>Descendre jusqu'à sentir l'étirement des ischio-jambiers (mi-tibia max)</li>
+              <li>Remontée en contractant les fessiers, pas en tirant avec le dos</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> Renforce la chaîne postérieure = meilleure propulsion en sprint, puissance en mêlée, et résistance aux plaquages bas. Les ischio-jambiers sont les muscles les plus blessés au rugby — les renforcer prévient les claquages.</div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Exercice très safe pour le genou (pas de cisaillement). Excellent pour la prévention des ischio-jambiers souvent fragilisés après un syndrome ITB. Focus sur le contrôle excentrique.</div>
+        </div>
+      </div>
+
+      <!-- BLOC 2 : EXPLOSIVITÉ -->
+      <div style="padding:16px 0 8px;">
+        <div class="superset-connector" style="color:#ffe06b;">⚡ BLOC 2 — EXPLOSIVITÉ (15 min)</div>
+      </div>
+
+      <div class="ex-card" id="ex-j3">
+        <div class="ex-header" onclick="toggleEx('ex-j3')">
+          <div class="ex-num">03</div>
+          <div class="ex-color-dot" style="background:#ffe06b;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Box Jump</div>
+            <div class="ex-tags">
+              <span class="ex-tag ex-tag-rugby">RUGBY</span>
+              <span class="ex-tag" style="background:rgba(232,200,58,0.12);color:#ffe06b;">EXPLOSIVITÉ</span>
+              <span class="ex-tag ex-tag-new">✦ NOUVEAU</span>
+            </div>
+          </div>
+          <span class="ex-badge-new">NEW</span>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">4 séries × 5 sauts — Repos 2' complet entre les séries</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps</th><th>Hauteur boîte</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffe06b;">5 sauts</span></td><td><input class="weight-input" type="text" value="50" /><span class="weight-unit">cm</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffe06b;">5 sauts</span></td><td><input class="weight-input" type="text" value="50" /><span class="weight-unit">cm</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">5 sauts</span></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">cm</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S4</span></td><td><span class="reps-range" style="color:#ffe06b;">5 sauts</span></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">cm</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Départ pieds à largeur épaules, légère flexion de genou</li>
+              <li>Bras en arrière, puis balancés vers l'avant au saut — <strong>triple extension</strong> (cheville, genou, hanche)</li>
+              <li>Réception silencieuse sur la boîte, pieds à plat, genou fléchi</li>
+              <li>Descendre de la boîte calmement — <strong>ne pas sauter en arrière</strong></li>
+              <li>Qualité maximale sur chaque saut — repos complet entre les séries</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> La puissance de saut = puissance en touche + départ de sprint explosif + premier pas en débordement. C'est l'exercice clé pour la vitesse de sortie de mêlée.</div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Réception contrôlée = pas de contrainte excessive sur le genou. Si douleur latérale → remplace par <strong>squat jump sans boîte</strong> au sol, même logique, moins de contrainte.</div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-j4">
+        <div class="ex-header" onclick="toggleEx('ex-j4')">
+          <div class="ex-num">04</div>
+          <div class="ex-color-dot" style="background:#ffe06b;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Bulgarian Split Squat</div>
+            <div class="ex-tags">
+              <span class="ex-tag ex-tag-rugby">RUGBY</span>
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">QUADRI</span>
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">FESSIERS</span>
+              <span class="ex-tag" style="background:rgba(232,200,58,0.12);color:#ffe06b;">UNILAT.</span>
+            </div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries × chaque jambe — Repos 1'30 entre les jambes</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge (haltères)</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffaa6b;">8 rep / jambe</span></td><td><input class="weight-input" type="text" value="12" /><span class="weight-unit">kg x2</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffaa6b;">8 rep / jambe</span></td><td><input class="weight-input" type="text" value="14" /><span class="weight-unit">kg x2</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">10 rep / jambe</span></td><td><input class="weight-input" type="text" value="12" /><span class="weight-unit">kg x2</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Pied arrière posé sur un banc (30–40cm), pied avant loin devant</li>
+              <li>Descendre verticalement — le genou avant ne dépasse pas trop les orteils</li>
+              <li>Tronc légèrement incliné en avant — naturel, pas excessif</li>
+              <li>Pousser sur le talon avant à la remontée</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> Travail unilatéral = équilibre musculaire gauche/droite crucial pour les changements de direction. Le demi de mêlée tourne souvent d'un côté dominant — cet exercice corrige les asymétries.</div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Commence léger (PDC ou haltères légers) les 2 premières semaines pour tester le genou. C'est l'exercice recommandé post-ITB pour renforcer sans surcharger la bandelette.</div>
+        </div>
+      </div>
+
+      <!-- BLOC 3 : PRÉVENTION & CHAÎNE POSTÉRIEURE -->
+      <div style="padding:16px 0 8px;">
+        <div class="superset-connector" style="color:#c47fff;">🩺 BLOC 3 — PRÉVENTION & CHAÎNE POST. (15 min)</div>
+      </div>
+
+      <div class="ex-card" id="ex-j5">
+        <div class="ex-header" onclick="toggleEx('ex-j5')">
+          <div class="ex-num">05</div>
+          <div class="ex-color-dot" style="background:#c47fff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Nordic Curl (ou leg curl couché)</div>
+            <div class="ex-tags">
+              <span class="ex-tag" style="background:rgba(155,58,232,0.12);color:#c47fff;">ISCHIO</span>
+              <span class="ex-tag ex-tag-rugby">PRÉVENTION</span>
+            </div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries — Repos 2' — Exercice préventif clé</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffe06b;">5–6 rep</span> <small style="color:var(--muted)">contrôle max</small></td><td><span style="font-size:13px;color:var(--muted);">PDC</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffe06b;">5–6 rep</span></td><td><span style="font-size:13px;color:var(--muted);">PDC</span></td><td><span class="rest-badge">2'</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">5–6 rep</span></td><td><span style="font-size:13px;color:var(--muted);">PDC</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique — Nordic Curl</div>
+            <ul>
+              <li>Genoux au sol, chevilles bloquées sous un banc ou par un partenaire</li>
+              <li>Tomber vers l'avant le plus lentement possible en contrôlant avec les ischio-jambiers</li>
+              <li>Se rattraper avec les mains, remonter en poussant avec les bras</li>
+              <li>La phase <strong>excentrique (descente)</strong> = 90% du bénéfice — prends 4–5 secondes</li>
+            </ul>
+          </div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Le Nordic Curl est l'exercice le mieux validé scientifiquement pour prévenir les claquages des ischio-jambiers. Après un ITB, les ischio sont souvent inhibés — cet exercice les réactive.</div>
+          <div class="alt-section">
+            <div class="alt-title">🔁 Alternative</div>
+            <div class="alt-item">Leg curl couché machine — 30/25/25kg × 10 rep (si pas de partenaire)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-j6">
+        <div class="ex-header" onclick="toggleEx('ex-j6')">
+          <div class="ex-num">06</div>
+          <div class="ex-color-dot" style="background:#c47fff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Hip Thrust barre</div>
+            <div class="ex-tags">
+              <span class="ex-tag" style="background:rgba(58,232,122,0.1);color:#5df59a;">FESSIERS</span>
+              <span class="ex-tag ex-tag-rugby">SPRINT</span>
+            </div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries classiques — Repos 1'30</div>
+            <table class="sets-table">
+              <thead><tr><th>Série</th><th>Reps cibles</th><th>Charge</th><th>Repos</th></tr></thead>
+              <tbody>
+                <tr><td><span class="serie-badge">S1</span></td><td><span class="reps-range" style="color:#ffe06b;">10 rep</span></td><td><input class="weight-input" type="text" value="60" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S2</span></td><td><span class="reps-range" style="color:#ffe06b;">10 rep</span></td><td><input class="weight-input" type="text" value="70" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">1'30</span></td></tr>
+                <tr><td><span class="serie-badge">S3</span></td><td><span class="reps-range" style="color:#ffe06b;">10 rep</span></td><td><input class="weight-input" type="text" value="80" /><span class="weight-unit">kg</span></td><td><span class="rest-badge">—</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique</div>
+            <ul>
+              <li>Dos appuyé sur un banc (omoplates sur le bord), pieds à plat, barre sur les hanches</li>
+              <li>Pousser les hanches vers le haut jusqu'à alignement genou-hanche-épaule</li>
+              <li>Contraction fessiers 1–2s en haut, menton rentré</li>
+              <li>Descente contrôlée sans toucher le sol entre les reps</li>
+            </ul>
+          </div>
+          <div class="rugby-note"><strong>🏉 Rugby :</strong> Les fessiers sont le principal moteur du sprint. Un hip thrust fort = départ de sprint plus explosif, meilleure propulsion en accélération courte — exactement ce qu'un demi de mêlée utilise sur chaque action.</div>
+          <div class="kine-note"><strong>🩺 Note kiné :</strong> Très safe pour le genou — zéro cisaillement. Excellent exercice post-ITB car il renforce le moyen fessier et le grand fessier simultanément, les deux antagonistes de la bandelette.</div>
+        </div>
+      </div>
+
+      <div class="ex-card" id="ex-j7">
+        <div class="ex-header" onclick="toggleEx('ex-j7')">
+          <div class="ex-num">07</div>
+          <div class="ex-color-dot" style="background:#c47fff;"></div>
+          <div class="ex-info">
+            <div class="ex-name">Clamshell + Élévation latérale de jambe (élastique)</div>
+            <div class="ex-tags">
+              <span class="ex-tag" style="background:rgba(155,58,232,0.12);color:#c47fff;">MOYEN FESSIER</span>
+              <span class="ex-tag ex-tag-rugby">PRÉVENTION ITB</span>
+            </div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="sets-section">
+            <div class="sets-label">3 séries × chaque côté — Pas de repos — Enchaîné</div>
+            <table class="sets-table">
+              <thead><tr><th>Exercice</th><th>Reps</th><th>Résistance</th><th>Note</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Clamshell</strong></td><td><span class="reps-range">20 rep / côté</span></td><td>Élastique léger</td><td><span class="rest-badge">→ direct</span></td></tr>
+                <tr><td><strong>Élév. latérale</strong></td><td><span class="reps-range">15 rep / côté</span></td><td>Élastique léger</td><td><span class="rest-badge">30s repos</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tech-notes">
+            <div class="tech-notes-title">📌 Technique — Clamshell</div>
+            <ul>
+              <li>Allongé sur le côté, genoux fléchis à 90°, hanches légèrement fléchies</li>
+              <li>Ouvrir le genou supérieur comme une coquille — rotation externe de hanche</li>
+              <li>Ne pas laisser le bassin basculer en arrière</li>
+              <li>Contraction 1s en haut, descente contrôlée</li>
+            </ul>
+          </div>
+          <div class="kine-note"><strong>🩺 Cet exercice est obligatoire</strong> à chaque séance jambes. Le moyen fessier faible est la cause n°1 du syndrome de l'essuie-glace. Le renforcer = prévention de la récidive.</div>
+        </div>
+      </div>
+
+      <!-- FIN : Circuit abdos intégré -->
+      <div style="padding:16px 0 8px;">
+        <div class="superset-connector" style="color:#ffaa6b;">🔥 FINISHER — Circuit Abdos 5 min</div>
+      </div>
+      <div style="padding:12px 16px; background:rgba(232,124,58,0.06); border:1px solid rgba(232,124,58,0.2); border-radius:8px; font-size:13px; color:var(--muted);">
+        Enchaîne directement avec le circuit abdos en fin de séance jambes. <strong style="color:#ffaa6b;">→ Voir l'onglet Circuit Abdos</strong> pour le détail complet.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CIRCUIT ABDOS -->
+  <div class="section" id="abdos">
+    <div class="section-label">Finisher — Après chaque séance ou à la maison</div>
+    <div class="section-title" style="color:#ffaa6b;">CIRCUIT ABDOS</div>
+    <p class="section-desc">Zéro matériel. Enchaîné sans repos entre les exercices. <strong>1 round = ~5 min.</strong> Faisable après n'importe quelle séance, ou seul à la maison.</p>
+
+    <div class="exercises">
+      <div class="ex-card open" id="ex-abs-main">
+        <div class="ex-header" onclick="toggleEx('ex-abs-main')">
+          <div class="ex-color-dot" style="background:#ffaa6b; margin-left:16px;"></div>
+          <div class="ex-info" style="margin-left:8px;">
+            <div class="ex-name">Circuit complet — 5 exercices / ~5 min / Sans matériel</div>
+            <div class="ex-tags"><span class="ex-tag ex-tag-core">CORE</span><span class="ex-tag ex-tag-rugby">RUGBY</span></div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+
+            <div style="display:flex; align-items:flex-start; gap:16px; padding:16px; background:var(--card2); border-radius:8px; border-left:3px solid #ffaa6b;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:36px; color:rgba(232,124,58,0.35); line-height:1; min-width:28px;">1</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; margin-bottom:6px;">Crunch bicycle <span style="font-family:'DM Mono',monospace; font-size:12px; color:#ffaa6b; background:rgba(232,124,58,0.1); padding:2px 8px; border-radius:4px;">30 secondes</span></div>
+                <div style="font-size:13px; color:var(--muted); line-height:1.6;">Allongé sur le dos, coudes derrière la tête. Alterner coude droit → genou gauche / coude gauche → genou droit. Rotation du <strong style="color:var(--text);">buste</strong>, pas juste des coudes. Rythme régulier et contrôlé.</div>
+                <div style="margin-top:8px; font-size:11px; color:#ffaa6b; font-family:'DM Mono',monospace;">🏉 Rotation du tronc = stabilité en plaquage, précision de la passe</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:16px; padding:16px; background:var(--card2); border-radius:8px; border-left:3px solid #ffaa6b;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:36px; color:rgba(232,124,58,0.35); line-height:1; min-width:28px;">2</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; margin-bottom:6px;">Hollow body hold <span style="font-family:'DM Mono',monospace; font-size:12px; color:#ffaa6b; background:rgba(232,124,58,0.1); padding:2px 8px; border-radius:4px;">20 secondes</span></div>
+                <div style="font-size:13px; color:var(--muted); line-height:1.6;">Allongé sur le dos, bras tendus derrière la tête, jambes tendues à 30–45° du sol. Bas du dos <strong style="color:var(--text);">bien plaqué au sol</strong>. Respire en tenant. Version facile : plier les genoux à 90°.</div>
+                <div style="margin-top:8px; font-size:11px; color:#ffaa6b; font-family:'DM Mono',monospace;">🩺 Activation du transverse = protection lombaire au quotidien</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:16px; padding:16px; background:var(--card2); border-radius:8px; border-left:3px solid #ffaa6b;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:36px; color:rgba(232,124,58,0.35); line-height:1; min-width:28px;">3</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; margin-bottom:6px;">Mountain climbers <span style="font-family:'DM Mono',monospace; font-size:12px; color:#ffaa6b; background:rgba(232,124,58,0.1); padding:2px 8px; border-radius:4px;">30 secondes</span></div>
+                <div style="font-size:13px; color:var(--muted); line-height:1.6;">Position de pompe. Ramener les genoux alternativement vers la poitrine le plus vite possible. Hanches <strong style="color:var(--text);">basses et stables</strong>, pas de rebond. Tempo rapide — c'est l'exercice cardio du circuit.</div>
+                <div style="margin-top:8px; font-size:11px; color:#ffaa6b; font-family:'DM Mono',monospace;">🏉 Gainage dynamique + cardio explosif = simulation de l'effort de match</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:16px; padding:16px; background:var(--card2); border-radius:8px; border-left:3px solid #ffaa6b;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:36px; color:rgba(232,124,58,0.35); line-height:1; min-width:28px;">4</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; margin-bottom:6px;">Dead bug <span style="font-family:'DM Mono',monospace; font-size:12px; color:#ffaa6b; background:rgba(232,124,58,0.1); padding:2px 8px; border-radius:4px;">10 reps chaque côté</span></div>
+                <div style="font-size:13px; color:var(--muted); line-height:1.6;">Allongé sur le dos, bras vers le plafond, genoux à 90°. Tendre simultanément bras droit + jambe gauche vers le sol sans les poser, revenir. Alterner. Bas du dos <strong style="color:var(--text);">collé au sol en permanence</strong> — critère absolu.</div>
+                <div style="margin-top:8px; font-size:11px; color:#ffaa6b; font-family:'DM Mono',monospace;">🩺 100% safe genou & épaule — gainage profond anti-douleur lombaire</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:flex-start; gap:16px; padding:16px; background:var(--card2); border-radius:8px; border-left:3px solid #5df59a;">
+              <div style="font-family:'Bebas Neue',sans-serif; font-size:36px; color:rgba(58,232,122,0.3); line-height:1; min-width:28px;">5</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; margin-bottom:6px;">Gainage planche avant-bras <span style="font-family:'DM Mono',monospace; font-size:12px; color:#5df59a; background:rgba(58,232,122,0.1); padding:2px 8px; border-radius:4px;">40 secondes</span></div>
+                <div style="font-size:13px; color:var(--muted); line-height:1.6;">Sur les avant-bras, corps droit de la tête aux talons. Contracter les fessiers + abdos + pousser les coudes dans le sol. Respiration régulière. <strong style="color:var(--text);">Fin du round.</strong> Repos 30s, puis 2e round si énergie.</div>
+                <div style="margin-top:8px; font-size:11px; color:#5df59a; font-family:'DM Mono',monospace;">🏉 Stabilité globale = résistance aux chocs et aux portés</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Timeline -->
+          <div style="margin-top:24px; padding:20px; background:rgba(232,124,58,0.05); border-radius:10px; border:1px solid rgba(232,124,58,0.2);">
+            <div style="font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#ffaa6b; margin-bottom:16px; font-family:'DM Mono',monospace;">⏱ TIMELINE DU ROUND</div>
+            <div style="display:flex; gap:0; border-radius:8px; overflow:hidden; border:1px solid rgba(232,124,58,0.15);">
+              <div style="flex:3; padding:12px 8px; text-align:center; background:rgba(232,124,58,0.08); border-right:1px solid rgba(232,124,58,0.15);">
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#ffaa6b; line-height:1;">0:00</div>
+                <div style="font-size:10px; color:var(--muted); margin-top:4px; line-height:1.4;">Bicycle<br><strong style="color:#ffaa6b;">30s</strong></div>
+              </div>
+              <div style="flex:2; padding:12px 8px; text-align:center; background:rgba(232,124,58,0.06); border-right:1px solid rgba(232,124,58,0.15);">
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#ffaa6b; line-height:1;">0:30</div>
+                <div style="font-size:10px; color:var(--muted); margin-top:4px; line-height:1.4;">Hollow<br><strong style="color:#ffaa6b;">20s</strong></div>
+              </div>
+              <div style="flex:3; padding:12px 8px; text-align:center; background:rgba(232,124,58,0.08); border-right:1px solid rgba(232,124,58,0.15);">
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#ffaa6b; line-height:1;">0:50</div>
+                <div style="font-size:10px; color:var(--muted); margin-top:4px; line-height:1.4;">Mountain<br><strong style="color:#ffaa6b;">30s</strong></div>
+              </div>
+              <div style="flex:5; padding:12px 8px; text-align:center; background:rgba(232,124,58,0.06); border-right:1px solid rgba(232,124,58,0.15);">
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#ffaa6b; line-height:1;">1:20</div>
+                <div style="font-size:10px; color:var(--muted); margin-top:4px; line-height:1.4;">Dead bug<br><strong style="color:#ffaa6b;">~60s</strong></div>
+              </div>
+              <div style="flex:4; padding:12px 8px; text-align:center; background:rgba(58,232,122,0.06);">
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:#5df59a; line-height:1;">2:20</div>
+                <div style="font-size:10px; color:var(--muted); margin-top:4px; line-height:1.4;">Planche<br><strong style="color:#5df59a;">40s</strong></div>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:12px; color:var(--muted);">
+              <span>1 round actif ≈ <strong style="color:var(--text);">3 min</strong></span>
+              <span>Repos 30s</span>
+              <span>2e round optionnel</span>
+              <span>Total max : <strong style="color:#ffaa6b;">~7 min</strong></span>
+            </div>
+          </div>
+
+          <div class="rugby-note" style="margin-top:16px;">
+            <strong>🏉 Pourquoi ce circuit pour un demi de mêlée :</strong> Le core est le centre de transfert d'énergie entre tes appuis au sol et tes bras lors de la passe. Un gainage fort = passes plus précises sous fatigue, meilleure résistance aux chocs en mêlée, et protection lombaire sur la durée de la saison.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDITIONING -->
+  <div class="section" id="conditioning">
+    <div class="section-label">Spécifique Rugby & Prévention</div>
+    <div class="section-title" style="color:#5df59a;">CONDITIONING</div>
+    <p class="section-desc">Bloc de 10–15 min à intégrer en fin de séance muscu <strong>ou</strong> lors des sorties course. Qualités physiques spécifiques au demi de mêlée.</p>
+    <div class="conseil-grid">
+      <div class="conseil-card" style="border-left:3px solid #5df59a;">
+        <div class="conseil-card-icon">⚡</div>
+        <div class="conseil-card-title">Explosivité de passe — 2x/semaine</div>
+        <p><strong>Medicine ball chest throw</strong> contre un mur : 4 séries × 8 lancers à vitesse maximale. Simule le pattern neuromusculaire exact de la passe de demi.<br><br><strong>Battle rope 20s effort / 20s repos</strong> × 5 rounds — endurance de puissance des membres supérieurs.</p>
+      </div>
+      <div class="conseil-card" style="border-left:3px solid #6ba8ff;">
+        <div class="conseil-card-icon">🔄</div>
+        <div class="conseil-card-title">Stabilité core — Chaque séance</div>
+        <p><strong>Pallof press poulie</strong> (gainage antirotation) : 3×12 de chaque côté. Essentiel pour la stabilité en contact et la précision des passes sous pression physique.<br><br><strong>Dead bug</strong> 3×10 — activation du gainage profond, sûr pour le genou ET l'épaule.</p>
+      </div>
+      <div class="conseil-card" style="border-left:3px solid var(--orange);">
+        <div class="conseil-card-icon">🦵</div>
+        <div class="conseil-card-title">Genou — Renfo préventif post ITB</div>
+        <p><strong>Clamshell avec bande élastique</strong> 3×20 — active le moyen fessier, protège le TFL (la cause principale du syndrome de l'essuie-glace).<br><br><strong>Bulgarian split squat léger</strong> 3×10 — à démarrer semaine 3–4 si symptôme-free confirmé. Charge légère, focus sur le contrôle.</p>
+      </div>
+      <div class="conseil-card" style="border-left:3px solid var(--yellow);">
+        <div class="conseil-card-icon">🏃</div>
+        <div class="conseil-card-title">Running post-ITB — Protocole</div>
+        <p>10km sans douleur = très bon signe.<br><br><strong>Semaines 1–3 :</strong> 1 sortie max/semaine, même allure. Pas d'augmentation de volume.<br><strong>Semaines 4+ :</strong> +10% de volume max par semaine si asymptomatique.<br><br>Travaille la <strong>cadence (>170 pas/min)</strong> pour réduire la contrainte sur le genou.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Avant chaque séance haut du corps</div>
+    <div class="section-title" style="font-size:28px;">WARM UP ÉPAULE — 8 MIN</div>
+    <div class="exercises" style="margin-top:20px;">
+      <div class="ex-card" id="ex-wu">
+        <div class="ex-header" onclick="toggleEx('ex-wu')">
+          <div class="ex-color-dot" style="background:#5df59a; margin-left:16px;"></div>
+          <div class="ex-info" style="margin-left:8px;">
+            <div class="ex-name">Protocole coiffe des rotateurs — AVANT chaque séance haut du corps</div>
+          </div>
+          <div class="ex-chevron">▾</div>
+        </div>
+        <div class="ex-body">
+          <div class="tech-notes" style="border-left-color:var(--green);">
+            <div class="tech-notes-title" style="color:#5df59a;">🩺 Protocole kiné — 5 exercices</div>
+            <ul>
+              <li><strong>Band pull-apart</strong> × 20 rep — élastique léger, bras tendus devant soi, écarter latéralement</li>
+              <li><strong>Rotation externe élastique</strong> × 15 rep chaque côté — coude à 90° collé au corps, rotation vers l'extérieur</li>
+              <li><strong>Cercles d'épaule progressifs</strong> × 10 dans chaque sens — amplitude croissante</li>
+              <li><strong>Pompes scapulaires</strong> × 10 — en planche, sortir et rentrer les omoplates bras tendus</li>
+              <li>2 séries légères de l'exercice principal × 15 rep @ 30% de la charge de travail</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSE -->
+  <div class="section" id="course">
+    <div class="section-label">Lundi & Samedi / Dimanche</div>
+    <div class="section-title" style="color:#FC4C02;">COURSE À PIED</div>
+    <p class="section-desc">Connecte ton compte Strava pour visualiser tes séances de course directement ici.</p>
+
+    <!-- STRAVA AUTH BLOCK -->
+    <div id="strava-auth-block">
+      <!-- STATE A : pas configuré -->
+      <div id="strava-setup" style="display:none;">
+        <div class="conseil-card" style="border-left:3px solid #FC4C02; margin-bottom:20px;">
+          <div class="conseil-card-icon">⚙️</div>
+          <div class="conseil-card-title">Configuration initiale — À faire une seule fois</div>
+          <p>Entre ton <strong>Client ID</strong> et ton <strong>Client Secret</strong> Strava. Tu les trouves sur <a href="https://www.strava.com/settings/api" target="_blank" style="color:#FC4C02;">strava.com/settings/api</a> après avoir créé une application.</p>
+        </div>
+        <div class="config-form" style="max-width:480px;">
+          <div>
+            <div class="config-label">Client ID</div>
+            <input class="config-input" id="input-client-id" type="text" placeholder="ex: 123456" />
+          </div>
+          <div>
+            <div class="config-label">Client Secret</div>
+            <input class="config-input" id="input-client-secret" type="password" placeholder="ex: abc123def456..." />
+          </div>
+          <div style="margin-top:4px; padding:12px 14px; background:rgba(58,126,232,0.08); border:1px solid rgba(58,126,232,0.2); border-radius:8px; font-size:12px; color:var(--muted); line-height:1.6;">
+            💡 <strong style="color:var(--text);">Authorization Callback Domain</strong> dans ton app Strava doit être : <code style="color:#6ba8ff; font-family:'DM Mono',monospace;" id="current-domain">ton-domaine.github.io</code>
+          </div>
+          <button class="strava-btn" onclick="saveStravaConfig()" style="width:fit-content;">
+            <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+            Sauvegarder & Connecter Strava
+          </button>
+        </div>
+      </div>
+
+      <!-- STATE B : configuré mais pas connecté -->
+      <div id="strava-connect" style="display:none;">
+        <div class="conseil-card" style="border-left:3px solid #FC4C02; margin-bottom:20px; max-width:520px;">
+          <div class="conseil-card-icon">🔗</div>
+          <div class="conseil-card-title">Connecte ton compte Strava</div>
+          <p>Clique sur le bouton pour autoriser l'accès à tes activités. Tu seras redirigé vers Strava puis ramené ici automatiquement.</p>
+        </div>
+        <a id="strava-auth-link" href="#" class="strava-btn">
+          <svg viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+          Se connecter avec Strava
+        </a>
+        <div style="margin-top:16px;">
+          <button onclick="resetStravaConfig()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;">↺ Changer les clés API</button>
+        </div>
+      </div>
+
+      <!-- STATE C : connecté -->
+      <div id="strava-connected-block" style="display:none;">
+        <div class="strava-connected" style="max-width:480px; margin-bottom:28px;">
+          <div class="strava-avatar-placeholder" id="athlete-avatar">🏃</div>
+          <div>
+            <div class="strava-label">CONNECTÉ</div>
+            <div class="strava-name" id="athlete-name">—</div>
+          </div>
+          <button class="btn-disconnect" onclick="disconnectStrava()">Déconnecter</button>
+        </div>
+
+        <!-- Summary bar -->
+        <div class="run-summary-bar" id="run-summary-bar" style="display:none;">
+          <div class="run-summary-card">
+            <div class="run-summary-val" id="sum-count">—</div>
+            <div class="run-summary-lbl">Sorties (30j)</div>
+          </div>
+          <div class="run-summary-card">
+            <div class="run-summary-val" id="sum-dist">—</div>
+            <div class="run-summary-lbl">km total</div>
+          </div>
+          <div class="run-summary-card">
+            <div class="run-summary-val" id="sum-time">—</div>
+            <div class="run-summary-lbl">Heures couru</div>
+          </div>
+          <div class="run-summary-card">
+            <div class="run-summary-val" id="sum-elev">—</div>
+            <div class="run-summary-lbl">D+ total (m)</div>
+          </div>
+        </div>
+
+        <!-- Runs list -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <div>
+            <div class="section-label" style="margin:0 0 4px;">Activités récentes</div>
+            <select id="run-filter" onchange="renderRuns()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;">
+              <option value="Run">Course à pied</option>
+              <option value="all">Toutes les activités</option>
+            </select>
+          </div>
+          <button onclick="fetchStravaActivities()" style="background:rgba(252,76,2,0.1);border:1px solid rgba(252,76,2,0.25);color:#FC4C02;padding:8px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.2s;" onmouseover="this.style.background='rgba(252,76,2,0.2)'" onmouseout="this.style.background='rgba(252,76,2,0.1)'">↻ Actualiser</button>
+        </div>
+
+        <div id="runs-container">
+          <div class="loading-runs">
+            <div class="spin"></div><br>Chargement de tes activités…
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESSION -->
+  <div class="section" id="progression">
+    <div class="section-label">Suivi & Planification sur 8 semaines</div>
+    <div class="section-title">PROGRESSION</div>
+    <p class="section-desc">Logique de progression progressive. Prudente sur les zones sensibles, ambitieuse sur les zones prioritaires.</p>
+
+    <table class="prog-table">
+      <thead>
+        <tr><th>Exercice</th><th>Sem. 1–2</th><th>Sem. 3–4</th><th>Sem. 5–6</th><th>Sem. 7–8</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Dév. incliné barre</strong></td><td>65/60/55kg ✓</td><td class="prog-up">+2.5kg S1</td><td class="prog-up">+2.5kg S1+S2</td><td class="prog-up">Test 70kg S1</td></tr>
+        <tr><td><strong>Écarté haltères</strong></td><td>14kg — technique</td><td class="prog-same">14kg — Sensation</td><td class="prog-up">+2kg si form OK</td><td class="prog-up">+2kg</td></tr>
+        <tr><td><strong>Dév. couché barre</strong></td><td>60/55/50kg</td><td class="prog-up">+2.5kg</td><td class="prog-up">+2.5kg</td><td class="prog-up">+2.5kg</td></tr>
+        <tr><td><strong>Dips lestés</strong></td><td>PDC / PDC / PDC</td><td class="prog-up">+5kg S1</td><td class="prog-up">+5kg S1+S2</td><td class="prog-up">+10kg S1</td></tr>
+        <tr><td><strong>Landmine Press</strong></td><td>30/25/20kg — technique</td><td class="prog-same">Même charge</td><td class="prog-up">+2.5kg si épaule OK</td><td class="prog-up">Éval. retour OHP</td></tr>
+        <tr><td><strong>Curl barre</strong></td><td>30/27/24kg — technique</td><td class="prog-up">+2.5kg S1</td><td class="prog-up">+2.5kg S1+S2</td><td class="prog-up">+2.5kg</td></tr>
+        <tr><td><strong>Triceps pushdown</strong></td><td>25/22/20kg</td><td class="prog-up">+2.5kg</td><td class="prog-up">+2.5kg</td><td class="prog-up">+2.5kg</td></tr>
+        <tr><td><strong>Skull Crusher</strong></td><td>20kg — technique</td><td class="prog-up">+2.5kg</td><td class="prog-up">+2.5kg</td><td class="prog-up">+2.5kg</td></tr>
+        <tr><td><strong>Élévations lat.</strong></td><td style="color:#ffaa6b;">8kg — prudence</td><td class="prog-same">8kg — sensation?</td><td class="prog-same">8–10kg si OK</td><td class="prog-up">Retour progressif</td></tr>
+        <tr><td><strong>Face pull / Oiseau</strong></td><td colspan="4" class="prog-same" style="text-align:center;">Maintenance — charge stable — priorité à la qualité d'exécution</td></tr>
+      </tbody>
+    </table>
+
+    <div class="divider"></div>
+    <div class="conseil-grid">
+      <div class="conseil-card">
+        <div class="conseil-card-icon">📏</div>
+        <div class="conseil-card-title">La règle du "+1"</div>
+        <p>Tu augmentes la charge <strong>uniquement si tu complètes le haut de la fourchette de reps</strong> sur toutes les séries, avec une technique propre. Une seule rep en dessous = même charge la semaine suivante.</p>
+      </div>
+      <div class="conseil-card">
+        <div class="conseil-card-icon">📓</div>
+        <div class="conseil-card-title">Note tes charges</div>
+        <p>Les champs de charge dans ce programme sont <strong>modifiables directement dans l'interface</strong>. Saisis tes charges réelles après chaque séance. Les valeurs proposées sont des points de départ basés sur ce que tu as partagé.</p>
+      </div>
+      <div class="conseil-card">
+        <div class="conseil-card-icon">🩺</div>
+        <div class="conseil-card-title">Critère épaule — règle absolue</div>
+        <p>Douleur >3/10 à l'épaule droite pendant un exercice : <strong>stop immédiat, passe à l'alternative.</strong> Jamais de force dans la douleur. Si symptômes persistants >2 semaines à l'entraînement → consulte un kiné.</p>
+      </div>
+      <div class="conseil-card">
+        <div class="conseil-card-icon">🏉</div>
+        <div class="conseil-card-title">Ré-évaluation à 8 semaines</div>
+        <p>À semaine 8 : <strong>bilan épaule droite</strong>. Si asymptomatique, retour progressif à l'OHP (commencer à 70% de l'ancienne charge). <strong>Bilan genou</strong> : reprise progressive des volumes de course selon ressenti.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'course') initCourseSection();
+}
+function toggleEx(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════
+//  SAUVEGARDE CHARGES (localStorage)
+// ══════════════════════════════════════════════
+const SAVE_KEY = 'rugby_programme_charges';
+
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('.weight-input').forEach(input => {
+    if (input.id) data[input.id] = input.value;
+  });
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  showSaveToast();
+}
+
+function loadAll() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    document.querySelectorAll('.weight-input').forEach(input => {
+      if (input.id && data[input.id] !== undefined) input.value = data[input.id];
+    });
+  } catch(e) {}
+}
+
+function showSaveToast() {
+  const toast = document.getElementById('save-toast');
+  toast.classList.add('visible');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+function resetAll() {
+  if (!confirm('Remettre toutes les charges aux valeurs par défaut ?')) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+// ══════════════════════════════════════════════
+//  STRAVA — CONFIG
+// ══════════════════════════════════════════════
+const STRAVA_SCOPE = 'read,activity:read_all';
+
+function getCallbackUrl() {
+  const base = window.location.href.replace(/\/[^\/]*$/, '');
+  return base + '/strava-callback.html';
+}
+
+function getAuthUrl(clientId) {
+  const redirect = encodeURIComponent(getCallbackUrl());
+  return `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirect}&response_type=code&scope=${STRAVA_SCOPE}`;
+}
+
+function saveStravaConfig() {
+  const id  = document.getElementById('input-client-id').value.trim();
+  const sec = document.getElementById('input-client-secret').value.trim();
+  if (!id || !sec) { alert('Remplis les deux champs.'); return; }
+  localStorage.setItem('strava_client_id', id);
+  localStorage.setItem('strava_client_secret', sec);
+  initCourseSection();
+}
+
+function resetStravaConfig() {
+  localStorage.removeItem('strava_client_id');
+  localStorage.removeItem('strava_client_secret');
+  initCourseSection();
+}
+
+function disconnectStrava() {
+  if (!confirm('Déconnecter Strava ?')) return;
+  ['strava_access_token','strava_refresh_token','strava_expires_at','strava_athlete','strava_activities'].forEach(k => localStorage.removeItem(k));
+  initCourseSection();
+}
+
+// ══════════════════════════════════════════════
+//  STRAVA — TOKEN REFRESH
+// ══════════════════════════════════════════════
+async function getValidToken() {
+  const expiresAt = parseInt(localStorage.getItem('strava_expires_at') || '0');
+  const now = Math.floor(Date.now() / 1000);
+
+  if (now < expiresAt - 300) {
+    return localStorage.getItem('strava_access_token');
+  }
+
+  // Refresh
+  const clientId     = localStorage.getItem('strava_client_id');
+  const clientSecret = localStorage.getItem('strava_client_secret');
+  const refreshToken = localStorage.getItem('strava_refresh_token');
+
+  if (!clientId || !clientSecret || !refreshToken) return null;
+
+  const res = await fetch('https://www.strava.com/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token'
+    })
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json();
+  localStorage.setItem('strava_access_token', data.access_token);
+  localStorage.setItem('strava_refresh_token', data.refresh_token);
+  localStorage.setItem('strava_expires_at',    data.expires_at);
+  return data.access_token;
+}
+
+// ══════════════════════════════════════════════
+//  STRAVA — FETCH ACTIVITÉS
+// ══════════════════════════════════════════════
+async function fetchStravaActivities() {
+  document.getElementById('runs-container').innerHTML = `
+    <div class="loading-runs"><div class="spin"></div><br>Chargement depuis Strava…</div>`;
+
+  try {
+    const token = await getValidToken();
+    if (!token) throw new Error('Token invalide — reconnecte-toi.');
+
+    const after = Math.floor((Date.now() - 60 * 24 * 3600 * 1000) / 1000); // 60 jours
+    const res = await fetch(
+      `https://www.strava.com/api/v3/athlete/activities?per_page=30&after=${after}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+
+    if (!res.ok) throw new Error('Erreur API Strava ' + res.status);
+    const activities = await res.json();
+
+    localStorage.setItem('strava_activities', JSON.stringify(activities));
+    renderRuns(activities);
+    updateSummary(activities);
+    document.getElementById('run-summary-bar').style.display = 'grid';
+
+  } catch(err) {
+    document.getElementById('runs-container').innerHTML = `
+      <div class="empty-runs">
+        <div class="empty-runs-icon">⚠️</div>
+        <div style="color:#ff6b63; margin-bottom:8px;">${err.message}</div>
+        <button class="strava-btn" onclick="disconnectStrava()" style="background:#333;margin-top:8px;">Reconnecter</button>
+      </div>`;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  STRAVA — RENDER
+// ══════════════════════════════════════════════
+function fmtPace(speed) { // m/s → min/km
+  if (!speed) return '—';
+  const secPerKm = 1000 / speed;
+  const min = Math.floor(secPerKm / 60);
+  const sec = Math.round(secPerKm % 60).toString().padStart(2,'0');
+  return `${min}'${sec}"`;
+}
+function fmtDist(m) { return (m / 1000).toFixed(2) + ' km'; }
+function fmtTime(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min${String(sec).padStart(2,'0')}`;
+}
+function fmtDate(str) {
+  return new Date(str).toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+}
+
+function renderRuns(activities) {
+  if (!activities) {
+    const raw = localStorage.getItem('strava_activities');
+    activities = raw ? JSON.parse(raw) : [];
+  }
+  const filter = document.getElementById('run-filter').value;
+  const filtered = filter === 'all' ? activities : activities.filter(a => a.type === filter || a.sport_type === filter);
+
+  if (!filtered.length) {
+    document.getElementById('runs-container').innerHTML = `
+      <div class="empty-runs">
+        <div class="empty-runs-icon">🏃</div>
+        <div>Aucune activité trouvée sur les 60 derniers jours.</div>
+      </div>`;
+    return;
+  }
+
+  const html = `<div class="run-grid">${filtered.map(a => `
+    <div class="run-card">
+      <div class="run-card-date">${fmtDate(a.start_date_local)}</div>
+      <div class="run-card-name">${a.name}</div>
+      <div class="run-stats">
+        <div class="run-stat">
+          <div class="run-stat-val">${(a.distance/1000).toFixed(1)}</div>
+          <div class="run-stat-lbl">km</div>
+        </div>
+        <div class="run-stat">
+          <div class="run-stat-val">${fmtTime(a.moving_time)}</div>
+          <div class="run-stat-lbl">Durée</div>
+        </div>
+        <div class="run-stat">
+          <div class="run-stat-val" style="font-size:17px;">${fmtPace(a.average_speed)}</div>
+          <div class="run-stat-lbl">Allure</div>
+          <div class="run-stat-sub">/km</div>
+        </div>
+      </div>
+      ${a.total_elevation_gain ? `<div class="run-card-hr" style="margin-top:10px;">⛰ <span>${a.total_elevation_gain}m D+</span></div>` : ''}
+      ${a.average_heartrate ? `<div class="run-card-hr"><span class="heart">♥</span> <span>${Math.round(a.average_heartrate)} bpm moy · ${a.max_heartrate || '—'} bpm max</span></div>` : ''}
+      ${a.suffer_score ? `<div class="run-card-hr">🔥 <span>Suffer score : ${a.suffer_score}</span></div>` : ''}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+        <span class="run-card-type">${a.sport_type || a.type}</span>
+        <a class="strava-link" href="https://www.strava.com/activities/${a.id}" target="_blank">Voir sur Strava →</a>
+      </div>
+    </div>`).join('')}</div>`;
+
+  document.getElementById('runs-container').innerHTML = html;
+}
+
+function updateSummary(activities) {
+  const runs = activities.filter(a => a.type === 'Run' || a.sport_type === 'Run');
+  const totalDist = runs.reduce((s,a) => s + a.distance, 0);
+  const totalTime = runs.reduce((s,a) => s + a.moving_time, 0);
+  const totalElev = runs.reduce((s,a) => s + (a.total_elevation_gain||0), 0);
+
+  document.getElementById('sum-count').textContent = runs.length;
+  document.getElementById('sum-dist').textContent  = (totalDist/1000).toFixed(0);
+  document.getElementById('sum-time').textContent  = (totalTime/3600).toFixed(1);
+  document.getElementById('sum-elev').textContent  = Math.round(totalElev);
+}
+
+// ══════════════════════════════════════════════
+//  STRAVA — INIT DE LA SECTION COURSE
+// ══════════════════════════════════════════════
+function initCourseSection() {
+  const setup     = document.getElementById('strava-setup');
+  const connect   = document.getElementById('strava-connect');
+  const connected = document.getElementById('strava-connected-block');
+
+  const clientId  = localStorage.getItem('strava_client_id');
+  const token     = localStorage.getItem('strava_access_token');
+  const athlete   = JSON.parse(localStorage.getItem('strava_athlete') || 'null');
+
+  // Afficher le domaine courant dans le setup
+  const domEl = document.getElementById('current-domain');
+  if (domEl) domEl.textContent = window.location.hostname || 'ton-domaine.github.io';
+
+  if (!clientId) {
+    setup.style.display = 'block';
+    connect.style.display = 'none';
+    connected.style.display = 'none';
+  } else if (!token) {
+    setup.style.display = 'none';
+    connect.style.display = 'block';
+    connected.style.display = 'none';
+    document.getElementById('strava-auth-link').href = getAuthUrl(clientId);
+  } else {
+    setup.style.display = 'none';
+    connect.style.display = 'none';
+    connected.style.display = 'block';
+
+    if (athlete) {
+      document.getElementById('athlete-name').textContent = athlete.firstname + ' ' + athlete.lastname;
+      if (athlete.profile_medium) {
+        document.getElementById('athlete-avatar').innerHTML = `<img class="strava-avatar" src="${athlete.profile_medium}" alt="${athlete.firstname}" />`;
+      }
+    }
+
+    // Charger depuis le cache ou fetcher
+    const cached = localStorage.getItem('strava_activities');
+    if (cached) {
+      const activities = JSON.parse(cached);
+      renderRuns(activities);
+      updateSummary(activities);
+      document.getElementById('run-summary-bar').style.display = 'grid';
+    } else {
+      fetchStravaActivities();
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+//  INIT AU CHARGEMENT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // IDs uniques pour les inputs de charge
+  let idx = 0;
+  document.querySelectorAll('.weight-input').forEach(input => {
+    input.id = 'w_' + idx++;
+  });
+  loadAll();
+
+  // Sauvegarde auto
+  document.querySelectorAll('.weight-input').forEach(input => {
+    input.addEventListener('change', saveAll);
+    input.addEventListener('blur', saveAll);
+  });
+
+  // Hash #course depuis le callback Strava
+  if (window.location.hash === '#course') {
+    const tab = document.getElementById('tab-course');
+    if (tab) showSection('course', tab);
+    history.replaceState(null, '', window.location.pathname);
+  }
+});
+</script>
+<div id="save-toast">✓ Charges sauvegardées</div>
+
+<div class="save-bar">
+  <div class="save-bar-info">Sauvegarde <span>automatique</span> à chaque modification — données stockées localement dans ton navigateur</div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn-save" onclick="saveAll()">💾 Sauvegarder</button>
+    <button class="btn-reset" onclick="resetAll()">↺ Réinitialiser</button>
+  </div>
+</div>
+
+</body>
+</html>
